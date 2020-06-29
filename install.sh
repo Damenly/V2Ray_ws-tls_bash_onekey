@@ -336,7 +336,21 @@ nginx_exist_check() {
         nginx_install
     fi
 }
+
 nginx_install() {
+    $INS -y install nginx
+
+    # 修改基本配置
+    sed -i 's/#user  nobody;/user  root;/' ${nginx_dir}/conf/nginx.conf
+    sed -i 's/worker_processes  1;/worker_processes  3;/' ${nginx_dir}/conf/nginx.conf
+    sed -i 's/    worker_connections  1024;/    worker_connections  4096;/' ${nginx_dir}/conf/nginx.conf
+    sed -i '$i include conf.d/*.conf;' ${nginx_dir}/conf/nginx.conf
+
+    # 添加配置文件夹，适配旧版脚本
+    mkdir ${nginx_dir}/conf/conf.d
+}
+
+nginx_raw_install() {
     #    if [[ -d "/etc/nginx" ]];then
     #        rm -rf /etc/nginx
     #    fi
