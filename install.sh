@@ -37,7 +37,6 @@ nginx_conf_dir="/etc/nginx/conf/conf.d"
 v2ray_conf="${v2ray_conf_dir}/config.json"
 nginx_conf="${nginx_conf_dir}/v2ray.conf"
 nginx_dir="/etc/nginx"
-web_dir="/home/wwwroot"
 nginx_openssl_src="/usr/local/src"
 v2ray_bin_dir="/usr/bin/v2ray"
 v2ray_info_file="$HOME/v2ray_info.inf"
@@ -294,14 +293,7 @@ modify_nginx_other() {
     sed -i "/return/c \\\treturn 301 https://${domain}\$request_uri;" ${nginx_conf}
     #sed -i "27i \\\tproxy_intercept_errors on;"  ${nginx_dir}/conf/nginx.conf
 }
-web_camouflage() {
-    ##请注意 这里和LNMP脚本的默认路径冲突，千万不要在安装了LNMP的环境下使用本脚本，否则后果自负
-    rm -rf /home/wwwroot
-    mkdir -p /home/wwwroot
-    cd /home/wwwroot || exit
-    git clone https://github.com/damenly/3DCEList.git
-    judge "web 站点伪装"
-}
+
 v2ray_install() {
     if [[ -d /root/v2ray ]]; then
         rm -rf /root/v2ray
@@ -546,7 +538,7 @@ nginx_conf_add() {
         ssl_ciphers           TLS13-AES-256-GCM-SHA384:TLS13-CHACHA20-POLY1305-SHA256:TLS13-AES-128-GCM-SHA256:TLS13-AES-128-CCM-8-SHA256:TLS13-AES-128-CCM-SHA256:EECDH+CHACHA20:EECDH+CHACHA20-draft:EECDH+ECDSA+AES128:EECDH+aRSA+AES128:RSA+AES128:EECDH+ECDSA+AES256:EECDH+aRSA+AES256:RSA+AES256:EECDH+ECDSA+3DES:EECDH+aRSA+3DES:RSA+3DES:!MD5;
         server_name           serveraddr.com;
         index index.html index.htm;
-        root  /home/wwwroot/3DCEList;
+        root /usr/share/nginx/html;
         error_page 400 = /400.html;
 
         # Config for 0-RTT in TLSv1.3
@@ -845,7 +837,6 @@ uninstall_all() {
         esac
     fi
     [[ -d $v2ray_conf_dir ]] && rm -rf $v2ray_conf_dir
-    [[ -d $web_dir ]] && rm -rf $web_dir
     systemctl daemon-reload
     echo -e "${OK} ${GreenBG} 已卸载，SSL证书文件已保留 ${Font}"
 }
@@ -878,7 +869,6 @@ install_v2ray_ws_tls() {
     nginx_exist_check
     v2ray_conf_add_tls
     nginx_conf_add
-    web_camouflage
     ssl_judge_and_install
     nginx_systemd
     vmess_qr_config_tls_ws
