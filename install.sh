@@ -78,7 +78,7 @@ add_firewalld_rules() {
     ps aux | grep -v grep | grep -q firewalld || return 0
     
     for p in ${ports[@]};do
-        firewall-cmd --zone=public --permanent --add-port=$p/tcp.
+        firewall-cmd --zone=public --permanent --add-port=$p/tcp
         firewall-cmd --reload
     done
 }
