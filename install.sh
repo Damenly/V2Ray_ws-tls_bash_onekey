@@ -51,6 +51,7 @@ nginx_version="1.18.0"
 openssl_version="1.1.1g"
 jemalloc_version="5.2.1"
 old_config_status="off"
+ports=(443 80)
 # v2ray_plugin_version="$(wget -qO- "https://github.com/shadowsocks/v2ray-plugin/tags" | grep -E "/shadowsocks/v2ray-plugin/releases/tag/" | head -1 | sed -r 's/.*tag\/v(.+)\">.*/\1/')"
 
 #移动旧版本配置信息 对小于 1.1.0 版本适配
@@ -67,6 +68,35 @@ source '/etc/os-release'
 
 #从VERSION中提取发行版系统的英文名称，为了在debian/ubuntu下添加相对应的Nginx apt源
 VERSION=$(echo "${VERSION}" | awk -F "[()]" '{print $2}')
+
+add_firewalld_rules() {
+    ps aux | grep -v grep | grep -q firewalld || return 0
+    
+    for p in ${ports[@]};do
+        firewall-cmd --zone=public --permanent --add-port=$p/tcp.
+        firewall-cmd --reload
+    done
+}
+
+add_iptables_rules() {
+    ps aux | grep -v grep | grep -q iptables || return 0
+    
+    for p in ${ports[@]};do
+        iptables -A INPUT -p tcp --dport $p -j ACCEPT
+    done
+
+    iptables-save > /etc/sysconfig/iptables
+}
+
+add_ufw_rules() {
+    systemctl status ufw | grep -q running || return 0
+    
+    for p in ${ports[@]};do
+        ufw allow $p
+    done
+    
+    systemctl restart ufw
+}
 
 check_system() {
     if [[ "${ID}" == "centos" && ${VERSION_ID} -ge 7 ]]; then
@@ -88,13 +118,9 @@ check_system() {
 
     $INS install dbus
 
-    systemctl stop firewalld
-    systemctl disable firewalld
-    echo -e "${OK} ${GreenBG} firewalld 已关闭 ${Font}"
-
-    systemctl stop ufw
-    systemctl disable ufw
-    echo -e "${OK} ${GreenBG} ufw 已关闭 ${Font}"
+    add_firewalld_rules
+    add_iptables_rules
+    add_ufw_rules
 }
 
 is_root() {
