@@ -2,7 +2,11 @@
 
 基于https://github.com/wulabing/V2Ray_ws-tls_bash_onekey
 
-Usage: wget -N --no-check-certificate -q -O install.sh "https://raw.githubusercontent.com/damenly/V2Ray_ws-tls_bash_onekey/master/install.sh" && chmod +x install.sh && bash install.sh
+Usage:
+
+1. wget -N --no-check-certificate -q -O install.sh "https://raw.githubusercontent.com/damenly/V2Ray_ws-tls_bash_onekey/master/install.sh" && chmod +x install.sh 
+2. 互动模式：./install.sh
+2. 自动化： ./install.sh -d $domain -f
 
 Changes:
     1. 不再在443部属wulabing的3DList
