@@ -823,8 +823,6 @@ EOF
 }
 
 tls_type() {
-    which nginx ||  echo "nginx not found" && exit 1
-
     if [[ -f "$nginx_conf" ]] && [[ "$shell_mode" == "ws" ]]; then
         echo "请选择支持的 TLS 版本（default:3）:"
         echo "请注意,如果你使用 Quantaumlt X / 路由器 / 旧版 Shadowrocket / 低于 4.18.1 版本的 V2ray core 请选择 兼容模式"
