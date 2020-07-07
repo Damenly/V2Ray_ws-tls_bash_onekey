@@ -551,7 +551,7 @@ old_config_exist_check() {
         if [[ -z "$Force" ]]; then
             read -r ssl_delete
         else
-            ssl_delete="y"
+            ssl_delete="N"
         fi
         
         case $ssl_delete in
