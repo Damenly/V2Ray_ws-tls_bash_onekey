@@ -269,7 +269,7 @@ basic_optimization() {
 }
 port_alterid_set() {
     if [[ "on" != "$old_config_status" ]]; then
-        [[ -n "$Force" ]] && port=443
+        [[ -n "$Force" ]] && [[ -z "$port" ]] && port=443
         [[ -z "$port" ]] && read -rp "请输入连接端口（default:443）:" port
         alterID=$RANDOM
     fi
