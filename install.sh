@@ -52,6 +52,11 @@ openssl_version="1.1.1g"
 jemalloc_version="5.2.1"
 old_config_status="off"
 ports=(443 80)
+Force=""
+inter=""
+domain=""
+port=""
+
 # v2ray_plugin_version="$(wget -qO- "https://github.com/shadowsocks/v2ray-plugin/tags" | grep -E "/shadowsocks/v2ray-plugin/releases/tag/" | head -1 | sed -r 's/.*tag\/v(.+)\">.*/\1/')"
 
 #移动旧版本配置信息 对小于 1.1.0 版本适配
@@ -163,7 +168,13 @@ chrony_install() {
     chronyc sourcestats -v
     chronyc tracking -v
     date
-    read -rp "请确认时间是否准确,误差范围±3分钟(Y/N): " chrony_install
+
+    if [[ -z "$Force" ]]; then
+        read -rp "请确认时间是否准确,误差范围±3分钟(Y/N): " chrony_install
+    else
+        chrony_install="Y"
+    fi
+    
     [[ -z ${chrony_install} ]] && chrony_install="Y"
     case $chrony_install in
     [yY][eE][sS] | [yY])
@@ -258,10 +269,9 @@ basic_optimization() {
 }
 port_alterid_set() {
     if [[ "on" != "$old_config_status" ]]; then
-        read -rp "请输入连接端口（default:443）:" port
-        [[ -z ${port} ]] && port="443"
-        read -rp "请输入alterID（default:2 仅允许填数字）:" alterID
-        [[ -z ${alterID} ]] && alterID="2"
+        [[ -n "$Force" ]] && port=443
+        [[ -z "$port" ]] && read -rp "请输入连接端口（default:443）:" port
+        alterID=$RANDOM
     fi
 }
 modify_path() {
@@ -454,7 +464,7 @@ ssl_install() {
     judge "安装 SSL 证书生成脚本"
 }
 domain_check() {
-    read -rp "请输入你的域名信息(eg:www.damenly.com):" domain
+    [[ -z "$domain" ]] && read -rp "请输入你的域名信息(eg:www.damenly.com):" domain
     domain_ip=$(ping "${domain}" -c 1 | sed '1{s/[^(]*(//;s/).*//;q}')
     echo -e "${OK} ${GreenBG} 正在获取 公网ip 信息，请耐心等待 ${Font}"
     local_ip=$(curl -4 ip.sb)
@@ -538,7 +548,12 @@ v2ray_conf_add_h2() {
 old_config_exist_check() {
     if [[ -f $v2ray_qr_config_file ]]; then
         echo -e "${OK} ${GreenBG} 检测到旧配置文件，是否读取旧文件配置 [Y/N]? ${Font}"
-        read -r ssl_delete
+        if [[ -z "$Force" ]]; then
+            read -r ssl_delete
+        else
+            ssl_delete="y"
+        fi
+        
         case $ssl_delete in
         [yY][eE][sS] | [yY])
             echo -e "${OK} ${GreenBG} 已保留旧配置  ${Font}"
@@ -721,7 +736,7 @@ vmess_link_image_choice() {
         echo "请选择生成的链接种类"
         echo "1: V2RayNG/V2RayN"
         echo "2: quantumult"
-        read -rp "请输入：" link_version
+        [[ -z  "$Force" ]] && read -rp "请输入：" link_version
         [[ -z ${link_version} ]] && link_version=1
         if [[ $link_version == 1 ]]; then
             vmess_qr_link_image
@@ -756,7 +771,12 @@ ssl_judge_and_install() {
     if [[ -f "/data/v2ray.key" || -f "/data/v2ray.crt" ]]; then
         echo "/data 目录下证书文件已存在"
         echo -e "${OK} ${GreenBG} 是否删除 [Y/N]? ${Font}"
-        read -r ssl_delete
+        if [[ -z "$Force" ]]; then
+            read -r ssl_delete
+        else
+            ssl_delete="y"
+        fi
+        
         case $ssl_delete in
         [yY][eE][sS] | [yY])
             rm -rf /data/*
@@ -811,7 +831,7 @@ tls_type() {
         echo "1: TLS1.1 TLS1.2 and TLS1.3（兼容模式）"
         echo "2: TLS1.2 and TLS1.3 (兼容模式)"
         echo "3: TLS1.3 only"
-        read -rp "请输入：" tls_version
+        [[ -z "$Force" ]] && read -rp "请输入：" tls_version
         [[ -z ${tls_version} ]] && tls_version=3
         if [[ $tls_version == 3 ]]; then
             sed -i 's/ssl_protocols.*/ssl_protocols         TLSv1.3;/' $nginx_conf
@@ -959,6 +979,9 @@ maintain() {
 }
 list() {
     case $1 in
+    install)
+        Force=1
+        ;;
     tls_modify)
         tls_type
         ;;
@@ -1089,4 +1112,46 @@ menu() {
 }
 
 judge_mode
-list "$1"
+[[ $# -eq 0 ]] && inter=1
+
+#list "$1"
+#
+#POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+key="$1"
+
+case $key in
+-d|--domain)
+    domain="$2"
+    shift # past argument
+    shift # past value
+    ;;
+-p|--port)
+    port="$2"
+    shift # past argument
+    shift # past value
+    ;;
+-f|--force)
+    Force=1
+    shift # past argument
+    ;;
+-i|--interactive)
+    inter=1;
+    shift
+    ;;
+-u|--uninstall)
+    uninstall_all
+    exit $?
+    ;;
+esac
+done
+
+if [[ -n $inter ]]; then
+    menu
+else
+    shell_mode="ws"
+    install_v2ray_ws_tls
+fi
+    
+
