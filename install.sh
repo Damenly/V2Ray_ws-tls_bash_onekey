@@ -584,7 +584,7 @@ nginx_conf_add() {
         error_page 400 = /400.html;
 
         # Config for 0-RTT in TLSv1.3
-        ssl_early_data on;
+        #ssl_early_data on;
         ssl_stapling on;
         ssl_stapling_verify on;
         add_header Strict-Transport-Security "max-age=31536000";
@@ -601,7 +601,7 @@ nginx_conf_add() {
         proxy_set_header Host \$http_host;
 
         # Config for 0-RTT in TLSv1.3
-        proxy_set_header Early-Data \$ssl_early_data;
+        #proxy_set_header Early-Data \$ssl_early_data;
         }
 }
     server {
