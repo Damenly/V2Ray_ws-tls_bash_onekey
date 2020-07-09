@@ -876,7 +876,7 @@ uninstall_all() {
         read -r uninstall_nginx
         case $uninstall_nginx in
         [yY][eE][sS] | [yY])
-            rm -rf $nginx_dir
+            ${INS} remove nginx
             echo -e "${OK} ${Green} 已卸载 Nginx ${Font}"
             ;;
         *) ;;
