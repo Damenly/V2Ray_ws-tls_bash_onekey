@@ -830,7 +830,7 @@ tls_type() {
         echo "2: TLS1.2 and TLS1.3 (兼容模式)"
         echo "3: TLS1.3 only"
         [[ -z "$Force" ]] && read -rp "请输入：" tls_version
-        [[ -z ${tls_version} ]] && tls_version=3
+        [[ -z ${tls_version} ]] && tls_version=1
         if [[ $tls_version == 3 ]]; then
             sed -i 's/ssl_protocols.*/ssl_protocols         TLSv1.3;/' $nginx_conf
             echo -e "${OK} ${GreenBG} 已切换至 TLS1.3 only ${Font}"
