@@ -825,7 +825,7 @@ EOF
 }
 
 tls_type() {
-    local tmp=$(nginx -v)
+    local tmp=$(nginx -v 2> /dev/stdout)
     local v=$(echo $tmp | sed -i 's/[^0-9.]*\([0-9.]*\).*/\1/')
     local type=""
     
