@@ -823,6 +823,10 @@ EOF
 }
 
 tls_type() {
+    local tmp=$(nginx -v)
+    local v=$(echo $tmp | sed -i 's/[^0-9.]*\([0-9.]*\).*/\1/')
+    local type=""
+    
     if [[ -f "$nginx_conf" ]] && [[ "$shell_mode" == "ws" ]]; then
         echo "请选择支持的 TLS 版本（default:3）:"
         echo "请注意,如果你使用 Quantaumlt X / 路由器 / 旧版 Shadowrocket / 低于 4.18.1 版本的 V2ray core 请选择 兼容模式"
@@ -832,15 +836,17 @@ tls_type() {
         [[ -z "$Force" ]] && read -rp "请输入：" tls_version
         [[ -z ${tls_version} ]] && tls_version=1
         if [[ $tls_version == 3 ]]; then
-            sed -i 's/ssl_protocols.*/ssl_protocols         TLSv1.3;/' $nginx_conf
-            echo -e "${OK} ${GreenBG} 已切换至 TLS1.3 only ${Font}"
+            type="TLSv1.3"
         elif [[ $tls_version == 1 ]]; then
-            sed -i 's/ssl_protocols.*/ssl_protocols         TLSv1.1 TLSv1.2 TLSv1.3;/' $nginx_conf
-            echo -e "${OK} ${GreenBG} 已切换至 TLS1.1 TLS1.2 and TLS1.3 ${Font}"
+            type="TLSv1.1 TLSv1.2 TLSv1.3"
         else
-            sed -i 's/ssl_protocols.*/ssl_protocols         TLSv1.2 TLSv1.3;/' $nginx_conf
-            echo -e "${OK} ${GreenBG} 已切换至 TLS1.2 and TLS1.3 ${Font}"
+            type="TLSv1.2 TLSv1.3"
         fi
+
+        [[ "$v" -lt 1.3 ]] && type="TLSv1.1 TLSv1.2"
+        
+        sed -i 's/ssl_protocols.*/ssl_protocols         ${type};/' $nginx_conf
+        echo -e "${OK} ${GreenBG} 已切换至 ${type} ${Font}"
         systemctl restart nginx
         judge "Nginx 重启"
     else
