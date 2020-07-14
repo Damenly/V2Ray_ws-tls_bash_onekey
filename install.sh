@@ -861,6 +861,18 @@ tls_type() {
         echo -e "${Error} ${RedBG} Nginx 或 配置文件不存在 或当前安装版本为 h2 ，请正确安装脚本后执行${Font}"
     fi
 }
+
+enable_bbr() {
+    modprobe tcp_bbr
+    [[ $? -ne 0 ]] && return $?
+    
+    echo "tcp_bbr" |  tee --append /etc/modules-load.d/modules.conf
+    echo "net.core.default_qdisc=fq" |  tee --append /etc/sysctl.conf
+    echo "net.ipv4.tcp_congestion_control=bbr" |  tee --append /etc/sysctl.conf
+
+    sysctl -p
+}
+
 show_access_log() {
     [ -f ${v2ray_access_log} ] && tail -f ${v2ray_access_log} || echo -e "${RedBG}log文件不存在${Font}"
 }
@@ -940,6 +952,7 @@ install_v2ray_ws_tls() {
     start_process_systemd
     enable_process_systemd
     acme_cron_update
+    enable_bbr
 }
 install_v2_h2() {
     is_root
