@@ -824,9 +824,14 @@ EOF
     systemctl daemon-reload
 }
 
+version() {
+    echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }';
+}
+
+
 tls_type() {
     local tmp=$(nginx -v 2> /dev/stdout)
-    local v=$(echo $tmp | sed -i 's/[^0-9.]*\([0-9.]*\).*/\1/')
+    local v=$(echo $tmp | sed 's/[^0-9.]*\([0-9.]*\).*/\1/')
     local type=""
     
     if [[ -f "$nginx_conf" ]] && [[ "$shell_mode" == "ws" ]]; then
@@ -845,10 +850,11 @@ tls_type() {
             type="TLSv1.2 TLSv1.3"
         fi
 
-        [[ "$v" -lt 1.3 ]] && type="TLSv1.1 TLSv1.2"
-        
-        sed -i 's/ssl_protocols.*/ssl_protocols         ${type};/' $nginx_conf
+	    [[ $(version $v) -lt $(version "1.13") ]] && type="TLSv1.1 TLSv1.2"
+	
+        sed -i "s/ssl_protocols.*/ssl_protocols         ${type};/" $nginx_conf
         echo -e "${OK} ${GreenBG} 已切换至 ${type} ${Font}"
+
         systemctl restart nginx
         judge "Nginx 重启"
     else
