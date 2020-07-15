@@ -368,11 +368,18 @@ nginx_exist_check() {
 
 nginx_install() {
     $INS -y install nginx
+}
 
+nginx_conf_change() {
     # 添加配置文件夹，适配旧版脚本
     mkdir -p ${nginx_dir}/conf/conf.d
 
-    [[ ! -f ${nginx_dir}/nginx.conf ]] && cp ${nginx_dir}/nginx.conf ${nginx_dir}/nginx.conf
+    [[ ! -f ${nginx_dir}/mime.types ]] && cp ${nginx_dir}/conf/mime.types ${nginx_dir}/mime.types
+    if [[ ! -f ${nginx_dir}/nginx.conf ]]; then 
+        cp ${nginx_dir}/conf/nginx.conf.default ${nginx_dir}/nginx.conf
+    else
+        return 0
+    fi
     
     # 修改基本配置
     sed -i 's/#user  nobody;/user  root;/' ${nginx_dir}/nginx.conf
@@ -942,6 +949,7 @@ install_v2ray_ws_tls() {
     port_exist_check "${port}"
     nginx_exist_check
     v2ray_conf_add_tls
+    nginx_conf_change
     nginx_conf_add
     ssl_judge_and_install
     nginx_systemd
