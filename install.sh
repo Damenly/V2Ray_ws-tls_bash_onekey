@@ -327,7 +327,7 @@ modify_nginx_other() {
     sed -i "/location/c \\\tlocation ${camouflage}" ${nginx_conf}
     sed -i "/proxy_pass/c \\\tproxy_pass http://127.0.0.1:${PORT};" ${nginx_conf}
     sed -i "/return/c \\\treturn 301 https://${domain}\$request_uri;" ${nginx_conf}
-    #sed -i "27i \\\tproxy_intercept_errors on;"  ${nginx_dir}/conf/nginx.conf
+    #sed -i "27i \\\tproxy_intercept_errors on;"  ${nginx_dir}/nginx.conf
 }
 
 v2ray_install() {
@@ -371,12 +371,13 @@ nginx_install() {
 
     # 添加配置文件夹，适配旧版脚本
     mkdir -p ${nginx_dir}/conf/conf.d
+
+    [[ ! -f ${nginx_dir}/nginx.conf ]] && cp ${nginx_dir}/nginx.conf ${nginx_dir}/nginx.conf
     
     # 修改基本配置
-    sed -i 's/#user  nobody;/user  root;/' ${nginx_dir}/conf/nginx.conf
-    sed -i 's/worker_processes  1;/worker_processes  3;/' ${nginx_dir}/conf/nginx.conf
-    sed -i 's/    worker_connections  1024;/    worker_connections  4096;/' ${nginx_dir}/conf/nginx.conf
-    sed -i '$i include conf.d/*.conf;' ${nginx_dir}/conf/nginx.conf
+    sed -i 's/#user  nobody;/user  root;/' ${nginx_dir}/nginx.conf
+    sed -i 's/worker_processes  1;/worker_processes  3;/' ${nginx_dir}/nginx.conf
+    sed -i 's/    worker_connections  1024;/    worker_connections  4096;/' ${nginx_dir}/nginx.conf
 }
 
 nginx_raw_install() {
@@ -438,10 +439,10 @@ nginx_raw_install() {
     judge "Nginx 编译安装"
 
     # 修改基本配置
-    sed -i 's/#user  nobody;/user  root;/' ${nginx_dir}/conf/nginx.conf
-    sed -i 's/worker_processes  1;/worker_processes  3;/' ${nginx_dir}/conf/nginx.conf
-    sed -i 's/    worker_connections  1024;/    worker_connections  4096;/' ${nginx_dir}/conf/nginx.conf
-    sed -i '$i include conf.d/*.conf;' ${nginx_dir}/conf/nginx.conf
+    sed -i 's/#user  nobody;/user  root;/' ${nginx_dir}/nginx.conf
+    sed -i 's/worker_processes  1;/worker_processes  3;/' ${nginx_dir}/nginx.conf
+    sed -i 's/    worker_connections  1024;/    worker_connections  4096;/' ${nginx_dir}/nginx.conf
+    sed -i '$i include conf.d/*.conf;' ${nginx_dir}/nginx.conf
 
     # 删除临时文件
     rm -rf ../nginx-"${nginx_version}"
