@@ -75,7 +75,7 @@ source '/etc/os-release'
 VERSION=$(echo "${VERSION}" | awk -F "[()]" '{print $2}')
 
 add_firewalld_rules() {
-    ps aux | grep -v grep | grep -q firewalld || return 0
+    systemctl status --no-pager firewalld || return 0
 
     update-alternatives --set iptables /usr/sbin/iptables-legacy
     update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
@@ -84,12 +84,13 @@ add_firewalld_rules() {
     
     for p in ${ports[@]};do
         firewall-cmd --zone=public --permanent --add-port=$p/tcp
-        firewall-cmd --reload
     done
+
+    firewall-cmd --reload
 }
 
 add_iptables_rules() {
-    ps aux | grep -v grep | grep -q iptables || return 0
+    systemctl status --no-pager iptables || return 0
     
     for p in ${ports[@]};do
         iptables -A INPUT -p tcp --dport $p -j ACCEPT
@@ -99,7 +100,7 @@ add_iptables_rules() {
 }
 
 add_ufw_rules() {
-    systemctl status ufw | grep -q running || return 0
+    systemctl status --no-pager ufw || return 0
     
     for p in ${ports[@]};do
         ufw allow $p
