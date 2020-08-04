@@ -870,13 +870,23 @@ tls_type() {
 
 enable_bbr() {
     modprobe tcp_bbr
-    [[ $? -ne 0 ]] && return $?
+    [[ $? -ne 0 ]] && \
+        echo -e "${RedBG} Please upgrade to newest kernel ${Font}" \
+        && return 1
     
     echo "tcp_bbr" |  tee --append /etc/modules-load.d/modules.conf
     echo "net.core.default_qdisc=fq" |  tee --append /etc/sysctl.conf
     echo "net.ipv4.tcp_congestion_control=bbr" |  tee --append /etc/sysctl.conf
 
     sysctl -p
+
+    sysctl net.ipv4.tcp_congestion_control | grep -q bbr
+
+    if [[ $? -eq 0 ]]; then
+        echo -e "${OK} ${GreenBG} bbr is enabled! ${Font}"
+    else
+        echo -e "${RedBG} Enable bbr failed ${Font}"
+    fi
 }
 
 change_sshd_config() {
@@ -899,6 +909,7 @@ change_sshd_config() {
     fi
 
     systemctl restart sshd
+    echo -e "${OK} ${GreenBG} sshd changed ${Font}"
 }
 
 show_access_log() {
