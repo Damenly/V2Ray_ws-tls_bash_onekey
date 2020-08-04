@@ -4,14 +4,23 @@
 
 Usage:
 
-1. wget -N --no-check-certificate -q -O install.sh "https://raw.githubusercontent.com/damenly/V2Ray_ws-tls_bash_onekey/master/install.sh" && chmod +x install.sh 
-2. 互动模式：./install.sh
-2. 自动化： ./install.sh -d $domain -f
+1.domain=你自己的域名
+
+2.全自动化  wget -N --no-check-certificate -q -O install.sh "https://raw.githubusercontent.com/damenly/V2Ray_ws-tls_bash_onekey/master/install.sh" && chmod +x install.sh && ./install.sh -d $domain -f
+
+或者
+
+2 互动模式 wget -N --no-check-certificate -q -O install.sh "https://raw.githubusercontent.com/damenly/V2Ray_ws-tls_bash_onekey/master/install.sh" && chmod +x install.sh && ./install.sh
+
 
 Changes:
+
     1. 不再在443部属wulabing的3DList
+    
     2. 不再自己编译nginx，使用包管理器自带的（安装更加迅速）
+    
     3. 不再关闭防火墙和ufw（更加安全)
+    
     4. 不再在名称前增加"wulabing_"前缀（更加干净）
 
 
