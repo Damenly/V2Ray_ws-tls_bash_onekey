@@ -976,6 +976,7 @@ install_v2ray_ws_tls() {
     domain_check
     old_config_exist_check
     port_alterid_set
+    ssl_judge_and_install
     v2ray_install
     port_exist_check 80
     port_exist_check "${port}"
@@ -983,7 +984,6 @@ install_v2ray_ws_tls() {
     v2ray_conf_add_tls
     nginx_conf_change
     nginx_conf_add
-    ssl_judge_and_install
     nginx_systemd
     vmess_qr_config_tls_ws
     basic_information
@@ -1005,11 +1005,11 @@ install_v2_h2() {
     domain_check
     old_config_exist_check
     port_alterid_set
+    ssl_judge_and_install
     v2ray_install
     port_exist_check 80
     port_exist_check "${port}"
     v2ray_conf_add_h2
-    ssl_judge_and_install
     vmess_qr_config_h2
     basic_information
     vmess_qr_link_image
