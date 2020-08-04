@@ -879,6 +879,28 @@ enable_bbr() {
     sysctl -p
 }
 
+change_sshd_config() {
+    [[ -z "$Force" ]] && return
+
+    [[ ! -f ~/.ssh/authorized_keys ]] && echo "please do sshd-copy-id first" && return 1
+
+    grep -q "^PermitRootLogin" /etc/ssh/sshd_config
+    if [[ $? -eq 0 ]]; then
+	sed -i "s/^PermitRootLogin.*/PermitRootLogin prohibit-password/" /etc/ssh/sshd_config
+    else
+	echo "PermitRootLogin prohibit-password" >> /etc/ssh/sshd_config
+    fi
+
+    grep -q "^PasswordAuthentication" /etc/ssh/sshd_config
+    if [[ $? -eq 0 ]]; then
+	sed -i "s/^PasswordAuthentication.*/PasswordAuthentication no/" /etc/ssh/sshd_config
+    else
+	echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
+    fi
+
+    systemctl restart sshd
+}
+
 show_access_log() {
     [ -f ${v2ray_access_log} ] && tail -f ${v2ray_access_log} || echo -e "${RedBG}log文件不存在${Font}"
 }
@@ -933,6 +955,7 @@ judge_mode() {
         fi
     fi
 }
+
 install_v2ray_ws_tls() {
     is_root
     check_system
@@ -960,6 +983,7 @@ install_v2ray_ws_tls() {
     enable_process_systemd
     acme_cron_update
     enable_bbr
+    change_sshd_config
 }
 install_v2_h2() {
     is_root
@@ -981,7 +1005,8 @@ install_v2_h2() {
     show_information
     start_process_systemd
     enable_process_systemd
-
+    enable_bbr
+    change_sshd_config
 }
 update_sh() {
     ol_version=$(curl -L -s https://raw.githubusercontent.com/damenly/V2Ray_ws-tls_bash_onekey/${github_branch}/install.sh | grep "shell_version=" | head -1 | awk -F '=|"' '{print $3}')
@@ -1171,6 +1196,11 @@ case $key in
 -i|--interactive)
     inter=1;
     shift
+    ;;
+-s|--sshd)
+    Force=1
+    change_sshd_config
+    exit $?
     ;;
 -u|--uninstall)
     uninstall_all
