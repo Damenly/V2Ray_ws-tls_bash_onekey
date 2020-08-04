@@ -126,7 +126,7 @@ check_system() {
         exit 1
     fi
 
-    $INS install dbus
+    $INS install dbus -y
 
     add_firewalld_rules
     add_iptables_rules
