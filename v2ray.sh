@@ -303,6 +303,8 @@ installV2Ray(){
         return 1
     }
 
+    ln -sf  /usr/bin/v2ray/v2ray /usr/local/bin/v2ray
+    
     # Install V2Ray server config to /etc/v2ray
     if [ ! -f '/etc/v2ray/config.json' ]; then
         local PORT="$(($RANDOM + 10000))"
