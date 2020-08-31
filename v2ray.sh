@@ -457,8 +457,8 @@ main(){
         fi
     fi
 
-    local ZIPROOT="$(zipRoot "${ZIPFILE}")"
     installSoftware unzip || return $?
+    local ZIPROOT="$(zipRoot "${ZIPFILE}")"
 
     if [ -n "${EXTRACT_ONLY}" ]; then
         colorEcho ${BLUE} "Extracting V2Ray package to ${VSRC_ROOT}."
