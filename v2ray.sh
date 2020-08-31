@@ -141,7 +141,7 @@ archAffix(){
 }
 
 zipRoot() {
-    unzip -lqq "$1" | awk -e '
+    unzip -lqq "$1" | awk '
         NR == 1 {
             prefix = $4;
         }
