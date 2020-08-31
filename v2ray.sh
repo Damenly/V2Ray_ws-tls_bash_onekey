@@ -324,7 +324,7 @@ installV2Ray(){
 installInitScript(){
     if [[ -n "${SYSTEMCTL_CMD}" ]]; then
         if [[ ! -f "/etc/systemd/system/v2ray.service" && ! -f "/lib/systemd/system/v2ray.service" ]]; then
-            unzip -oj "$1" "$2systemd/v2ray.service" -d '/etc/systemd/system' && \
+            unzip -oj "$1" "$2systemd/system/v2ray.service" -d '/etc/systemd/system' && \
             systemctl enable v2ray.service
         fi
     elif [[ -n "${SERVICE_CMD}" ]] && [[ ! -f "/etc/init.d/v2ray" ]]; then
