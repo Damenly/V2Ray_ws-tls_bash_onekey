@@ -32,7 +32,7 @@ shell_version="1.1.5.0"
 shell_mode="None"
 github_branch="master"
 version_cmp="/tmp/version_cmp.tmp"
-v2ray_conf_dir="/etc/v2ray"
+v2ray_conf_dir="/usr/local/v2ray"
 nginx_conf_dir="/etc/nginx/conf.d"
 v2ray_conf="${v2ray_conf_dir}/config.json"
 nginx_conf="${nginx_conf_dir}/v2ray.conf"
@@ -60,7 +60,7 @@ port=""
 # v2ray_plugin_version="$(wget -qO- "https://github.com/shadowsocks/v2ray-plugin/tags" | grep -E "/shadowsocks/v2ray-plugin/releases/tag/" | head -1 | sed -r 's/.*tag\/v(.+)\">.*/\1/')"
 
 #移动旧版本配置信息 对小于 1.1.0 版本适配
-[[ -f "/etc/v2ray/vmess_qr.json" ]] && mv /etc/v2ray/vmess_qr.json $v2ray_qr_config_file
+[[ -f "$v2ray_conf_dir/vmess_qr.json" ]] && mv $v2ray_conf_dir/vmess_qr.json $v2ray_qr_config_file
 
 #简易随机数
 random_num=$((RANDOM%12+4))
@@ -333,8 +333,8 @@ v2ray_install() {
     if [[ -d /root/v2ray ]]; then
         rm -rf /root/v2ray
     fi
-    if [[ -d /etc/v2ray ]]; then
-        rm -rf /etc/v2ray
+    if [[ -d $v2ray_conf_dir ]]; then
+        rm -rf $v2ray_conf_dir
     fi
     mkdir -p /root/v2ray
     cd /root/v2ray || exit
@@ -539,7 +539,7 @@ acme() {
     fi
 }
 v2ray_conf_add_tls() {
-    cd /etc/v2ray || exit
+    cd $v2ray_conf_dir || exit
     wget --no-check-certificate https://raw.githubusercontent.com/damenly/V2Ray_ws-tls_bash_onekey/${github_branch}/tls/config.json -O config.json
     modify_path
     modify_alterid
@@ -547,7 +547,7 @@ v2ray_conf_add_tls() {
     modify_UUID
 }
 v2ray_conf_add_h2() {
-    cd /etc/v2ray || exit
+    cd $v2ray_conf_dir || exit
     wget --no-check-certificate https://raw.githubusercontent.com/damenly/V2Ray_ws-tls_bash_onekey/${github_branch}/http2/config.json -O config.json
     modify_path
     modify_alterid
