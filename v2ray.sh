@@ -327,7 +327,8 @@ installV2Ray(){
     if [[ -n "${SYSTEMCTL_CMD}" ]]; then
         if [[ ! -f "/etc/systemd/system/v2ray.service" && ! -f "/lib/systemd/system/v2ray.service" ]]; then
             find $v2_dir -name v2ray.service -exec cp  {} /etc/systemd/system/v2ray.service \;
-            sed -i "s/\/bin/\/v2ray/" /usr/local/v2ray/systemd/system/v2ray.service /etc/systemd/system/v2ray.service
+            sed -i "s/User=.*/#User/" /etc/systemd/system/v2ray.service
+            sed -i "s/\/bin/\/v2ray/" /etc/systemd/system/v2ray.service
             sed -i "s/local\/etc/local/" /etc/systemd/system/v2ray.service
             systemctl enable v2ray.service
         fi
