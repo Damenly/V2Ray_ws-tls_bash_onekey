@@ -36,6 +36,7 @@ SOFTWARE_UPDATED=0
 SYSTEMCTL_CMD=$(command -v systemctl 2>/dev/null)
 SERVICE_CMD=$(command -v service 2>/dev/null)
 
+v2_dir="/usr/local/v2ray"
 #######color code########
 RED="31m"      # Error message
 GREEN="32m"    # Success message
@@ -249,7 +250,7 @@ getVersion(){
         NEW_VER="$(normalizeVersion "$VERSION")"
         return 4
     else
-        VER="$(/usr/bin/v2ray/v2ray -version 2>/dev/null)"
+        VER="$($v2_dir/v2ray -version 2>/dev/null)"
         RETVAL=$?
         CUR_VER="$(normalizeVersion "$(echo "$VER" | head -n 1 | cut -d " " -f2)")"
         TAG_URL="https://api.github.com/repos/v2fly/v2ray-core/releases/latest"
@@ -295,16 +296,14 @@ startV2ray(){
 }
 
 installV2Ray(){
-    # Install V2Ray binary to /usr/bin/v2ray
+    # Install V2Ray binary to $v2_dir
     mkdir -p '/etc/v2ray' '/var/log/v2ray' && \
-    unzip -oj "$1" "$2v2ray" "$2v2ctl" "$2geoip.dat" "$2geosite.dat" -d '/usr/bin/v2ray' && \
-    chmod +x '/usr/bin/v2ray/v2ray' '/usr/bin/v2ray/v2ctl' || {
+    unzip -oj "$1" "$2v2ray" "$2v2ctl" "$2geoip.dat" "$2geosite.dat" -d "$v2_dir" && \
+    chmod +x "$v2_dir/v2ray" "$v2_dir/v2ctl" || {
         colorEcho ${RED} "Failed to copy V2Ray binary and resources."
         return 1
     }
 
-    ln -sf  /usr/bin/v2ray/v2ray /usr/local/bin/v2ray
-    
     # Install V2Ray server config to /etc/v2ray
     if [ ! -f '/etc/v2ray/config.json' ]; then
         local PORT="$(($RANDOM + 10000))"
@@ -356,7 +355,7 @@ remove(){
             stopV2ray
         fi
         systemctl disable v2ray.service
-        rm -rf "/usr/bin/v2ray" "/etc/systemd/system/v2ray.service"
+        rm -rf "$v2_dir" "/etc/systemd/system/v2ray.service"
         if [[ $? -ne 0 ]]; then
             colorEcho ${RED} "Failed to remove V2Ray."
             return 0
@@ -370,7 +369,7 @@ remove(){
             stopV2ray
         fi
         systemctl disable v2ray.service
-        rm -rf "/usr/bin/v2ray" "/lib/systemd/system/v2ray.service"
+        rm -rf "$v2_dir" "/lib/systemd/system/v2ray.service"
         if [[ $? -ne 0 ]]; then
             colorEcho ${RED} "Failed to remove V2Ray."
             return 0
@@ -383,7 +382,7 @@ remove(){
         if pgrep "v2ray" > /dev/null ; then
             stopV2ray
         fi
-        rm -rf "/usr/bin/v2ray" "/etc/init.d/v2ray"
+        rm -rf "$v2_dir" "/etc/init.d/v2ray"
         if [[ $? -ne 0 ]]; then
             colorEcho ${RED} "Failed to remove V2Ray."
             return 0
@@ -423,6 +422,7 @@ main(){
     local ARCH=$(uname -m)
     VDIS="$(archAffix)"
 
+    [ ! -d "$v2_dir" ] && mkdir $v2_dir
     # extract local file
     if [[ $LOCAL_INSTALL -eq 1 ]]; then
         colorEcho ${YELLOW} "Installing V2Ray via local file. Please make sure the file is a valid V2Ray package, as we are not able to determine that."
